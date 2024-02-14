@@ -21,6 +21,34 @@ namespace API.Controllers
     {
         private readonly SqlConnection _conn = Utils.GetConnection(_config.GetConnectionString("DefaultConnection")!);
 
+        [HttpGet]
+        [Route("Lista")]
+        public IActionResult GetAllRutes()
+        {
+            string q = "EXECUTE usp_ListarRutas";
+            DataTable dt = new();
+            List<Ruta> rutas = [];
+
+            try
+            {
+                new SqlDataAdapter(q, _conn).Fill(dt);
+                foreach (DataRow el in dt.Rows)
+                {
+                    Ruta newRute = new ((int)el["NumeroR"], (string)el["InicioR"], (string)el["FinR"], (bool)el["EstadoR"]);
+                    rutas.Add(newRute);
+                }
+                return Ok(new Response(STATUS_MESSAGES.OK, rutas));
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new Response(STATUS_MESSAGES.ERROR, ex.Message));
+            }
+            finally
+            {
+                _conn.Close();
+            }
+        }
+
         [HttpPost]
         [Authorize]
         [Route("Agregar")]
@@ -32,6 +60,7 @@ namespace API.Controllers
                 return Unauthorized(new Response(STATUS_MESSAGES.DENIED, "No estas autorizado a agregar una ruta"));
             }
             string q = $"EXECUTE usp_agregarRuta {ruta.NumeroR}, '{ruta.InicioR}', '{ruta.FinR}', '{ruta.EstadoR}'";
+
 
             try
             {
@@ -138,33 +167,6 @@ namespace API.Controllers
         //}
 
 
-        //[HttpGet]
-        //[Route("Lista")]
-        //public IActionResult GetAllRutes()
-        //{
-        //    string q = "EXECUTE usp_ListarRutas";
-        //    DataTable dt = new();
-        //    List<Ruta> rutas = [];
-
-        //    try
-        //    {
-        //        new SqlDataAdapter(q, _conn).Fill(dt);
-        //        foreach (DataRow el in dt.Rows)
-        //        {
-        //            Ruta newRute = new ((int)el["NumeroR"], (string)el["InicioR"], (string)el["FinR"], (bool)el["EstadoR"]);
-        //            rutas.Add(newRute);
-        //        }
-        //        return Ok(new Response("Ok", rutas));
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        return BadRequest(new Response(STATUS_MESSAGES.ERROR, ex.Message));
-        //    }
-        //    finally
-        //    {
-        //        _conn.Close();
-        //    }
-        //}
 
         public class ChangeRute(string InicioR, string FinR)
         {
