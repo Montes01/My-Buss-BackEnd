@@ -9,7 +9,7 @@ namespace My_Buss_BackEnd.Helpers
     internal static class Utils
     {
         public static string GenerateToken(Claim[] claims, byte[] keyBytes)
-        { 
+        {
             var claimsIdentity = new ClaimsIdentity(claims);
             var tokenDescriptor = new SecurityTokenDescriptor
             {
@@ -26,6 +26,10 @@ namespace My_Buss_BackEnd.Helpers
         {
             if (conn.State == ConnectionState.Open) conn.Close();
         }
+        public static void OpenConnection(SqlConnection conn)
+        {
+            if (conn.State == ConnectionState.Closed) conn.Open();
+        }
 
         public static void ExecuteQuery(string query, SqlConnection conn)
         {
@@ -33,7 +37,13 @@ namespace My_Buss_BackEnd.Helpers
             cmd.ExecuteNonQuery();
         }
 
-        public static SqlConnection GetConnection(string connectionString) => new SqlConnection(connectionString);
+        public static SqlConnection GetConnection(string connectionString) => new(connectionString);
 
+
+        public static class Token
+        {
+            public static string? GetClaim(HttpContext context, string claimType) => context.User.FindFirst(claimType)?.Value;
+        }
     }
+
 }
