@@ -25,14 +25,14 @@ namespace API.Controllers
         [Route("Lista")]
         public IActionResult GetAllRutes()
         {
-            string q = "EXECUTE usp_ListarRutas";
+
             try
             {
                 var dt = Utils.GetTableFromQuery(q, _conn);
                 List<Ruta> rutas = [];
                 foreach (DataRow el in dt.Rows)
                 {
-                    Ruta newRute = new((int)el["NumeroR"], el["InicioR"]!.ToString()!, el["FinR"]!.ToString()!, (bool)el["EstadoR"]);
+                    Ruta newRute = new((int)el["NumeroR"], el["Inicio"]!.ToString()!, el["Fin"]!.ToString()!, (bool)el["EstadoR"], el["Empresa"].ToString() ?? "");
                     rutas.Add(newRute);
                 }
                 return Ok(new Response(STATUS_MESSAGES.OK, rutas));
