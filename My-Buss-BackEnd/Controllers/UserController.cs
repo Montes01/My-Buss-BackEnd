@@ -69,7 +69,7 @@ namespace API.Controllers
 
             try
             {
-                _conn.Open();
+                Utils.OpenConnection(_conn);
                 Utils.ExecuteQuery(q, _conn);
             }
             catch (Exception ex)
