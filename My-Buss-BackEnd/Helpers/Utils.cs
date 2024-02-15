@@ -37,6 +37,13 @@ namespace My_Buss_BackEnd.Helpers
             cmd.ExecuteNonQuery();
         }
 
+        public static DataTable GetTableFromQuery (string query, SqlConnection conn)
+        {
+            DataTable dt = new();
+            new SqlDataAdapter(query, conn).Fill(dt);
+            return dt;
+        }
+
         public static SqlConnection GetConnection(string connectionString) => new(connectionString);
 
 

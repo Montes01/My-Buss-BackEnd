@@ -26,15 +26,13 @@ namespace API.Controllers
         public IActionResult GetAllRutes()
         {
             string q = "EXECUTE usp_ListarRutas";
-            DataTable dt = new();
-            List<Ruta> rutas = [];
-
             try
             {
-                new SqlDataAdapter(q, _conn).Fill(dt);
+                var dt = Utils.GetTableFromQuery(q, _conn);
+                List<Ruta> rutas = [];
                 foreach (DataRow el in dt.Rows)
                 {
-                    Ruta newRute = new ((int)el["NumeroR"], (string)el["InicioR"], (string)el["FinR"], (bool)el["EstadoR"]);
+                    Ruta newRute = new((int)el["NumeroR"], el["InicioR"]!.ToString()!, el["FinR"]!.ToString()!, (bool)el["EstadoR"]);
                     rutas.Add(newRute);
                 }
                 return Ok(new Response(STATUS_MESSAGES.OK, rutas));
@@ -42,10 +40,6 @@ namespace API.Controllers
             catch (Exception ex)
             {
                 return BadRequest(new Response(STATUS_MESSAGES.ERROR, ex.Message));
-            }
-            finally
-            {
-                _conn.Close();
             }
         }
 
