@@ -25,7 +25,7 @@ namespace API.Controllers
         [Route("Lista")]
         public IActionResult GetAllRutes()
         {
-
+            string q = "EXECUTE usp_ListarRutas";
             try
             {
                 var dt = Utils.GetTableFromQuery(q, _conn);
