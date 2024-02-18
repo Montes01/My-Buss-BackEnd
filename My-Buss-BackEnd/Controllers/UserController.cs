@@ -63,7 +63,7 @@ namespace API.Controllers
 
         [HttpPost]
         [Route("Registrar")]
-        public IActionResult Registrar([FromBody] Usuario request)
+        public IActionResult Registrar([FromBody] Usuario request) 
         {
             string q = $"EXECUTE usp_registrarUsuario '{request.Foto}', '{request.Nombre}', '{request.Apellido}', {request.Edad}, '{request.Telefono}', '{request.Contraseña}', '{request.Correo}', '{request.Documento}', '{request.Rol}'";
 
