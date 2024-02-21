@@ -17,7 +17,7 @@ namespace API.Controllers
 {
     [Route("Ruta")]
     [ApiController]
-    public class RutaController(IConfiguration _config) : ControllerBase
+    public class RouteController(IConfiguration _config) : ControllerBase
     {
         private readonly SqlConnection _conn = Utils.GetConnection(_config.GetConnectionString("DefaultConnection")!);
 
