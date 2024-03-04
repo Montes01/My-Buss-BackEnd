@@ -32,7 +32,7 @@ namespace API.Controllers
                 List<Ruta> rutas = [];
                 foreach (DataRow el in dt.Rows)
                 {
-                    Ruta newRute = new((int)el["NumeroR"], el["Inicio"]!.ToString()!, el["Fin"]!.ToString()!, (bool)el["Estado"], int.Parse(el["Empresa"].ToString() ?? "0"));
+                    Ruta newRute = new((int)el["NumeroR"], el["Inicio"]!.ToString()!, el["Fin"]!.ToString()!, (bool)el["Estado"], int.Parse(el["fkIdEmpresa"].ToString() ?? "0"));
                     rutas.Add(newRute);
                 }
                 return Ok(new Response(STATUS_MESSAGES.OK, rutas));
