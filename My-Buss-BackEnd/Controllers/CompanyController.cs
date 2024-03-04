@@ -39,5 +39,27 @@ namespace My_Buss_BackEnd.Controllers
             }
         }
 
+        [HttpPost]
+        [Route("Registrar")]
+        public IActionResult RegisterCompany(Empresa company)
+        {
+            string q = $"EXEC usp_RegistrarEmpresa '{company.IdEmpresa}', '{company.Nombre}', '{company.Ubicacion}', '{company.Telefono}', '{company.Correo_electronico}', '{company.Imagen}', '{company.Contraseña}'";            
+
+            Utils.OpenConnection(_conn);
+            try
+            {
+                Utils.ExecuteQuery(q, _conn);
+                return Ok(new Response(STATUS_MESSAGES.OK, "Empresa registrada correctamente"));
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new Response(STATUS_MESSAGES.ERROR, ex.Message));
+            }
+            finally
+            {
+                Utils.CloseConnection(_conn);
+            }
+        }
+
     }
 }
