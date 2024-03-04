@@ -32,7 +32,7 @@ namespace API.Controllers
                 List<Ruta> rutas = [];
                 foreach (DataRow el in dt.Rows)
                 {
-                    Ruta newRute = new((int)el["NumeroR"], el["Inicio"]!.ToString()!, el["Fin"]!.ToString()!, (bool)el["Estado"], el["Empresa"].ToString() ?? "");
+                    Ruta newRute = new((int)el["NumeroR"], el["Inicio"]!.ToString()!, el["Fin"]!.ToString()!, (bool)el["Estado"], int.Parse(el["Empresa"].ToString() ?? "0"));
                     rutas.Add(newRute);
                 }
                 return Ok(new Response(STATUS_MESSAGES.OK, rutas));
@@ -48,13 +48,8 @@ namespace API.Controllers
         [Route("Agregar")]
         public IActionResult AddRute([FromBody] Ruta ruta)
         {
-            string? rol = Utils.Token.GetClaim(HttpContext, "rol");
-            if (string.IsNullOrEmpty(rol) || !(rol == "ADMIN" || rol == "SUPERADMIN"))
-            {
-                return Unauthorized(new Response(STATUS_MESSAGES.DENIED, "No estas autorizado a agregar una ruta"));
-            }
-            string q = $"EXECUTE usp_agregarRuta {ruta.NumeroR}, '{ruta.InicioR}', '{ruta.FinR}', '{ruta.EstadoR}'";
 
+            string q = $"EXECUTE usp_agregarRuta {ruta.NumeroR}, '{ruta.InicioR}', '{ruta.FinR}', '{ruta.EstadoR}', {ruta.FkIdEmpresa}";
 
             try
             {
@@ -71,6 +66,28 @@ namespace API.Controllers
             }
 
             return Ok(new Response(STATUS_MESSAGES.OK, "Ruta agregada correctamente"));
+        }
+
+        [HttpGet]
+        [Route("ListaPorEmpresa")]
+        public IActionResult GetRutesByCompany([FromQuery] int IdEmpresa)
+        {
+            string q = $"EXECUTE usp_ListarRutasPorEmpresa {IdEmpresa}";
+            try
+            {
+                var dt = Utils.GetTableFromQuery(q, _conn);
+                List<Ruta> rutas = [];
+                foreach (DataRow el in dt.Rows)
+                {
+                    Ruta newRute = new((int)el["NumeroR"], el["Inicio"]!.ToString()!, el["Fin"]!.ToString()!, (bool)el["Estado"], int.Parse(el["fkIdEmpresa"].ToString() ?? "0"));
+                    rutas.Add(newRute);
+                }
+                return Ok(new Response(STATUS_MESSAGES.OK, rutas));
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new Response(STATUS_MESSAGES.ERROR, ex.Message));
+            }
         }
 
         //[HttpDelete]
