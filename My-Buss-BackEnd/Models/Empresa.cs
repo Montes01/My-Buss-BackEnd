@@ -1,14 +1,14 @@
 ﻿namespace My_Buss_BackEnd.Models
 {
-    public class Empresa( string IdEmpresa, string Nombre, string Ubicacion, string Telefono, string Correo_electronico, string? Imagen, string? Contraseña )
+    public class Empresa
     {
-        public string IdEmpresa { get; set; } = IdEmpresa;
-        public string Nombre { get; set; } = Nombre;
-        public string Ubicacion { get; set; } = Ubicacion;
-        public string Telefono { get; set; } = Telefono;
-        public string Correo_electronico { get; set; } = Correo_electronico;
-        public string? Imagen { get; set; } = Imagen;
-        public string? Contraseña { get; set; } = Contraseña;
+        public int ID_Empresa { get; set; }
+        public string Nombre { get; set; }
+        public string CorreoElectronico { get; set; }
+        public string Contraseña { get; set; }
+        public string? Logo { get; set; }
+        public string? Dirección { get; set; }
+        public string Teléfono { get; set;}
     }
 
 }
