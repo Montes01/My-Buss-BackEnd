@@ -1,11 +1,14 @@
 ﻿namespace API.Models
 {
-    public class Ruta (int numeroR, string inicioR, string finR, bool estadoR, int fkIdEmpresa)
+    public class Ruta
     {
-        public int NumeroR { get; set; } = numeroR;
-        public string InicioR { get; set; } = inicioR;
-        public string FinR { get; set; } = finR;
-        public bool EstadoR { get; set; } = estadoR;
-        public int FkIdEmpresa { get; set; } = fkIdEmpresa;
+        public int ID_Ruta { get; set; }
+        public int ID_Empresa { get; set; }
+        public string Nombre { get; set; }
+        public string? Tipo { get; set; }
+        public string? Descripción { get; set; }
+        public string? Horario { get; set; }
+        public double Tarifa { get; set; }
+
     }
 }

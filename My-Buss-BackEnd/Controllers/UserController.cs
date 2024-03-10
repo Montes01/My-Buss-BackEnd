@@ -23,22 +23,38 @@ namespace API.Controllers
         [Route("Ingresar")]
         public IActionResult Validar([FromBody] InicioSesion request)
         {
-            string q = $"EXECUTE usp_iniciarSesion '{request.Documento}', '{request.contraseña}'";
-
-            SqlDataAdapter da = new(q, _conn);
-            var dt = new DataTable();
-            Usuario usuario;
+            string q = $"EXECUTE IniciarSesion '{request.Correo}', '{request.Contraseña}'";
             try
             {
-                da.Fill(dt);
+                DataTable dt = Utils.GetTableFromQuery(q, _conn);
                 if (dt.Rows.Count < 1) return Unauthorized(new Response(STATUS_MESSAGES.DENIED, "Usuario no encontrado"));
-                usuario = new Usuario(
-                            dt.Rows[0]["Foto"].ToString()!, dt.Rows[0]["Nombre"].ToString()!,
-                            dt.Rows[0]["Apellido"].ToString()!, int.Parse(dt.Rows[0]["Edad"].ToString()!),
-                            dt.Rows[0]["Telefono"].ToString()!, dt.Rows[0]["Contraseña"].ToString()!,
-                            dt.Rows[0]["Correo"].ToString()!, dt.Rows[0]["Documento"].ToString()!,
-                            dt.Rows[0]["Rol"].ToString()!
-                            );
+                DataRow row = dt.Rows[0];
+                Usuario usuario = new 
+                    (
+                        (int)row["ID_Usuario"],
+                        row["Nombre"].ToString()!,
+                        request.Correo,
+                        row["Teléfono"].ToString()!,
+                        row["Rol"].ToString(), 
+                        null, 
+                        row["FotoPerfil"].ToString(), 
+                        row["Dirección"].ToString()
+                    );
+
+
+
+                Claim[] claim = [
+                    new Claim("Nombre", usuario.Nombre),
+                    new Claim("CorreoElectronico", usuario.CorreoElectronico),
+                    new Claim("Teléfono", usuario.Teléfono),
+                    new Claim("ID_Usuario", usuario.ID_Usuario.ToString()),
+                    new Claim("FotoPerfil", usuario.FotoPerfil ?? "empty"),
+                    new Claim("Rol", usuario.Rol!),
+                    new Claim("Direccion", usuario.Dirección ?? "empty")
+                ];
+                string token = Utils.GenerateToken(claim, keyBytes);
+
+                return Ok(new Response(STATUS_MESSAGES.OK, token));
 
             }
             catch (Exception ex)
@@ -46,27 +62,26 @@ namespace API.Controllers
                 return BadRequest(new Response(STATUS_MESSAGES.ERROR, ex.Message));
             }
 
-            Claim[] claim = [
-                new("Foto", usuario.Foto ?? ""),
-                new("Nombre", usuario.Nombre),
-                new("Apellido", usuario.Apellido),
-                new("Edad", usuario.Edad.ToString()),
-                new("Telefono", usuario.Telefono),
-                new("Correo", usuario.Correo),
-                new("Documento", usuario.Documento),
-                new("Rol", usuario.Rol)
-                ];
-            string token = Utils.GenerateToken(claim, keyBytes);
-
-            return Ok(new Response(STATUS_MESSAGES.OK, token));
         }
 
         [HttpPost]
         [Route("Registrar")]
         public IActionResult Registrar([FromBody] Usuario request) 
         {
-            string q = $"EXECUTE usp_registrarUsuario '{request.Foto}', '{request.Nombre}', '{request.Apellido}', {request.Edad}, '{request.Telefono}', '{request.Contraseña}', '{request.Correo}', '{request.Documento}', '{request.Rol}'";
-
+            if (request.Contraseña == null)
+            {
+                return BadRequest(new Response("Debes enviar una contraseña", null));
+            }
+            /*
+                 @Nombre NVARCHAR(100),
+    @Rol NVARCHAR(50) = NULL,
+    @CorreoElectronico NVARCHAR(100),
+    @Contraseña NVARCHAR(50),
+    @FotoPerfil NVARCHAR(MAX) = NULL,
+    @Dirección NVARCHAR(200) = NULL,
+    @Teléfono NVARCHAR(20)
+             */
+            string q = $"EXECUTE RegistrarUsuario '{request.Nombre}', '{request.Rol}', '{request.CorreoElectronico}', '{request.Contraseña}', '{request.FotoPerfil}', '{request.Dirección}', '{request.Teléfono}'";
             try
             {
                 Utils.OpenConnection(_conn);

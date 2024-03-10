@@ -1,8 +1,8 @@
 ﻿namespace API.Models
 {
-    public class InicioSesion
+    public class InicioSesion( string Correo, string contraseña)
     {
-        public string Documento { get; set; }
-        public string contraseña { get; set; }
+        public string Correo { get; set; } = Correo;
+        public string Contraseña { get; set; } = contraseña;
     }
 }
