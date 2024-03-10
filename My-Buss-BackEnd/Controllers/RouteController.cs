@@ -1,5 +1,4 @@
-﻿using API.Models;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
+﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -21,27 +20,7 @@ namespace API.Controllers
     {
         //private readonly SqlConnection _conn = Utils.GetConnection(_config.GetConnectionString("DefaultConnection")!);
 
-        //[HttpGet]
-        //[Route("Lista")]
-        //public IActionResult GetAllRutes()
-        //{
-        //    string q = "EXECUTE usp_ListarRutas";
-        //    try
-        //    {
-        //        var dt = Utils.GetTableFromQuery(q, _conn);
-        //        List<Ruta> rutas = [];
-        //        foreach (DataRow el in dt.Rows)
-        //        {
-        //            Ruta newRute = new((int)el["NumeroR"], el["Inicio"]!.ToString()!, el["Fin"]!.ToString()!, (bool)el["Estado"], int.Parse(el["Empresa"].ToString() ?? "0"));
-        //            rutas.Add(newRute);
-        //        }
-        //        return Ok(new Response(STATUS_MESSAGES.OK, rutas));
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        return BadRequest(new Response(STATUS_MESSAGES.ERROR, ex.Message));
-        //    }
-        //}
+
 
         //[HttpPost]
         //[Authorize]

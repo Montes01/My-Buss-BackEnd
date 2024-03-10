@@ -1,4 +1,4 @@
-﻿namespace API.Models
+﻿namespace My_Buss_BackEnd.Models
 {
     public class Ruta
     {
