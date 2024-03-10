@@ -49,27 +49,35 @@ namespace API.Controllers
             return Ok(new Response(STATUS_MESSAGES.OK, "Ruta agregada correctamente"));
         }
 
-        //[HttpGet]
-        //[Route("ListaPorEmpresa")]
-        //public IActionResult GetRutesByCompany([FromQuery] int IdEmpresa)
-        //{
-        //    string q = $"EXECUTE usp_ListarRutasPorEmpresa {IdEmpresa}";
-        //    try
-        //    {
-        //        var dt = Utils.GetTableFromQuery(q, _conn);
-        //        List<Ruta> rutas = [];
-        //        foreach (DataRow el in dt.Rows)
-        //        {
-        //            Ruta newRute = new((int)el["NumeroR"], el["Inicio"]!.ToString()!, el["Fin"]!.ToString()!, (bool)el["Estado"], int.Parse(el["fkIdEmpresa"].ToString() ?? "0"));
-        //            rutas.Add(newRute);
-        //        }
-        //        return Ok(new Response(STATUS_MESSAGES.OK, rutas));
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        return BadRequest(new Response(STATUS_MESSAGES.ERROR, ex.Message));
-        //    }
-        //}
+        [HttpGet]
+        [Route("ListaPorEmpresa")]
+        public IActionResult GetRutesByCompany([FromQuery] int ID_Empresa)
+        {
+            string q = $"EXECUTE ListarRutasPorEmpresa {ID_Empresa}";
+            try
+            {
+                var dt = Utils.GetTableFromQuery(q, _conn);
+                List<Ruta> rutas = [];
+                foreach (DataRow item in dt.Rows)
+                {
+                    rutas.Add(new Ruta
+                    {
+                        ID_Ruta = (int)item["ID_Ruta"]!,
+                        ID_Empresa = (int)item["ID_Empresa"]!,
+                        Nombre = item["Nombre"].ToString()!,
+                        Tipo = item["Tipo"].ToString() ?? "empty",
+                        Descripción = item["Descripción"].ToString() ?? "empty",
+                        Horario = item["Horario"].ToString() ?? "empty",
+                        Tarifa = double.Parse(item["Tarifa"]?.ToString() ?? "0")
+                    });
+                }
+                return Ok(new Response(STATUS_MESSAGES.OK, rutas));
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new Response(STATUS_MESSAGES.ERROR, ex.Message));
+            }
+        }
 
         //[HttpDelete]
         //[Authorize]
@@ -157,14 +165,5 @@ namespace API.Controllers
         //        _conn.Close();
         //    }
         //}
-
-
-
-        public class ChangeRute(string InicioR, string FinR)
-        {
-            public string InicioR { get; set; } = InicioR;
-            public string FinR { get; set; } = FinR;
-        }
-
     }
 }
