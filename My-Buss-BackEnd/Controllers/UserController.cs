@@ -1,8 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using API.Models;
 using System.Security.Claims;
-using Microsoft.IdentityModel.Tokens;
-using System.IdentityModel.Tokens.Jwt;
 using System.Text;
 using System.Data;
 using System.Data.SqlClient;
@@ -70,7 +67,7 @@ namespace API.Controllers
         {
             if (request.Contraseña == null)
             {
-                return BadRequest(new Response("Debes enviar una contraseña", null));
+                return BadRequest(new Response(STATUS_MESSAGES.ERROR, "Debes enviar una contraseña"));
             }
             /*
                  @Nombre NVARCHAR(100),

@@ -1,4 +1,4 @@
-﻿namespace API.Models
+﻿namespace My_Buss_BackEnd.Models
 {
     public class Usuario (int id_usuario, string nombre, string correoElectronico, string teléfono, string? rol, string? contraseña, string? fotoPerfil, string? dirección)
     {
