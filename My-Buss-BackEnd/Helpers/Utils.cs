@@ -37,7 +37,7 @@ namespace My_Buss_BackEnd.Helpers
             cmd.ExecuteNonQuery();
         }
 
-        public static DataTable GetTableFromQuery (string query, SqlConnection conn)
+        public static DataTable GetTableFromQuery(string query, SqlConnection conn)
         {
             DataTable dt = new();
             new SqlDataAdapter(query, conn).Fill(dt);
@@ -50,6 +50,19 @@ namespace My_Buss_BackEnd.Helpers
         public static class Token
         {
             public static string? GetClaim(HttpContext context, string claimType) => context.User.FindFirst(claimType)?.Value;
+
+            public static Claim[] GetClaims(HttpContext context)
+            {
+                string token = context.Request.Headers.Authorization.ToString().Replace("Bearer ", "");
+                
+                var handler = new JwtSecurityTokenHandler();
+
+                var jsonToken = handler.ReadToken(token) as JwtSecurityToken;
+
+                return jsonToken?.Claims.ToArray() ?? [];
+
+
+            }
         }
     }
 

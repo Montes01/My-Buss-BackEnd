@@ -18,34 +18,36 @@ namespace API.Controllers
     [ApiController]
     public class RouteController(IConfiguration _config) : ControllerBase
     {
-        //private readonly SqlConnection _conn = Utils.GetConnection(_config.GetConnectionString("DefaultConnection")!);
+        private readonly SqlConnection _conn = Utils.GetConnection(_config.GetConnectionString("DefaultConnection")!);
 
 
 
-        //[HttpPost]
-        //[Authorize]
-        //[Route("Agregar")]
-        //public IActionResult AddRute([FromBody] Ruta ruta)
-        //{
+        [HttpPost]
+        [Authorize]
+        [Route("Agregar")]
+        public IActionResult AddRute([FromBody] Ruta ruta)
+        {
 
-        //    string q = $"EXECUTE usp_agregarRuta {ruta.NumeroR}, '{ruta.InicioR}', '{ruta.FinR}', '{ruta.EstadoR}', {ruta.FkIdEmpresa}";
+            string? ID_EMPRESA = Utils.Token.GetClaim(HttpContext, "ID_Empresa") ?? null;
+            if (ID_EMPRESA == null) return Unauthorized(new Response(STATUS_MESSAGES.DENIED, "No estas autorizado para agregar una ruta"));
+            string q = $"EXECUTE AgregarRuta {ID_EMPRESA}, '{ruta.Nombre}', '{ruta.Tipo}', '{ruta.Descripción}', '{ruta.Horario}', {ruta.Tarifa}";
 
-        //    try
-        //    {
-        //        Utils.OpenConnection(_conn);
-        //        Utils.ExecuteQuery(q, _conn);
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        return BadRequest(new Response(STATUS_MESSAGES.ERROR, ex.Message));
-        //    }
-        //    finally
-        //    {
-        //        Utils.CloseConnection(_conn);
-        //    }
+            try
+            {
+                Utils.OpenConnection(_conn);
+                Utils.ExecuteQuery(q, _conn);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new Response(STATUS_MESSAGES.ERROR, ex.Message));
+            }
+            finally
+            {
+                Utils.CloseConnection(_conn);
+            }
 
-        //    return Ok(new Response(STATUS_MESSAGES.OK, "Ruta agregada correctamente"));
-        //}
+            return Ok(new Response(STATUS_MESSAGES.OK, "Ruta agregada correctamente"));
+        }
 
         //[HttpGet]
         //[Route("ListaPorEmpresa")]
