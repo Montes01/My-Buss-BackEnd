@@ -18,56 +18,66 @@ namespace API.Controllers
     [ApiController]
     public class RouteController(IConfiguration _config) : ControllerBase
     {
-        //private readonly SqlConnection _conn = Utils.GetConnection(_config.GetConnectionString("DefaultConnection")!);
+        private readonly SqlConnection _conn = Utils.GetConnection(_config.GetConnectionString("DefaultConnection")!);
 
 
 
-        //[HttpPost]
-        //[Authorize]
-        //[Route("Agregar")]
-        //public IActionResult AddRute([FromBody] Ruta ruta)
-        //{
+        [HttpPost]
+        [Authorize]
+        [Route("Agregar")]
+        public IActionResult AddRute([FromBody] Ruta ruta)
+        {
 
-        //    string q = $"EXECUTE usp_agregarRuta {ruta.NumeroR}, '{ruta.InicioR}', '{ruta.FinR}', '{ruta.EstadoR}', {ruta.FkIdEmpresa}";
+            string? ID_EMPRESA = Utils.Token.GetClaim(HttpContext, "ID_Empresa") ?? null;
+            if (ID_EMPRESA == null) return Unauthorized(new Response(STATUS_MESSAGES.DENIED, "No estas autorizado para agregar una ruta"));
+            string q = $"EXECUTE AgregarRuta {ID_EMPRESA}, '{ruta.Nombre}', '{ruta.Tipo}', '{ruta.Descripción}', '{ruta.Horario}', {ruta.Tarifa}";
 
-        //    try
-        //    {
-        //        Utils.OpenConnection(_conn);
-        //        Utils.ExecuteQuery(q, _conn);
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        return BadRequest(new Response(STATUS_MESSAGES.ERROR, ex.Message));
-        //    }
-        //    finally
-        //    {
-        //        Utils.CloseConnection(_conn);
-        //    }
+            try
+            {
+                Utils.OpenConnection(_conn);
+                Utils.ExecuteQuery(q, _conn);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new Response(STATUS_MESSAGES.ERROR, ex.Message));
+            }
+            finally
+            {
+                Utils.CloseConnection(_conn);
+            }
 
-        //    return Ok(new Response(STATUS_MESSAGES.OK, "Ruta agregada correctamente"));
-        //}
+            return Ok(new Response(STATUS_MESSAGES.OK, "Ruta agregada correctamente"));
+        }
 
-        //[HttpGet]
-        //[Route("ListaPorEmpresa")]
-        //public IActionResult GetRutesByCompany([FromQuery] int IdEmpresa)
-        //{
-        //    string q = $"EXECUTE usp_ListarRutasPorEmpresa {IdEmpresa}";
-        //    try
-        //    {
-        //        var dt = Utils.GetTableFromQuery(q, _conn);
-        //        List<Ruta> rutas = [];
-        //        foreach (DataRow el in dt.Rows)
-        //        {
-        //            Ruta newRute = new((int)el["NumeroR"], el["Inicio"]!.ToString()!, el["Fin"]!.ToString()!, (bool)el["Estado"], int.Parse(el["fkIdEmpresa"].ToString() ?? "0"));
-        //            rutas.Add(newRute);
-        //        }
-        //        return Ok(new Response(STATUS_MESSAGES.OK, rutas));
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        return BadRequest(new Response(STATUS_MESSAGES.ERROR, ex.Message));
-        //    }
-        //}
+        [HttpGet]
+        [Route("ListaPorEmpresa")]
+        public IActionResult GetRutesByCompany([FromQuery] int ID_Empresa)
+        {
+            string q = $"EXECUTE ListarRutasPorEmpresa {ID_Empresa}";
+            try
+            {
+                var dt = Utils.GetTableFromQuery(q, _conn);
+                List<Ruta> rutas = [];
+                foreach (DataRow item in dt.Rows)
+                {
+                    rutas.Add(new Ruta
+                    {
+                        ID_Ruta = (int)item["ID_Ruta"]!,
+                        ID_Empresa = (int)item["ID_Empresa"]!,
+                        Nombre = item["Nombre"].ToString()!,
+                        Tipo = item["Tipo"].ToString() ?? "empty",
+                        Descripción = item["Descripción"].ToString() ?? "empty",
+                        Horario = item["Horario"].ToString() ?? "empty",
+                        Tarifa = double.Parse(item["Tarifa"]?.ToString() ?? "0")
+                    });
+                }
+                return Ok(new Response(STATUS_MESSAGES.OK, rutas));
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new Response(STATUS_MESSAGES.ERROR, ex.Message));
+            }
+        }
 
         //[HttpDelete]
         //[Authorize]
@@ -155,14 +165,5 @@ namespace API.Controllers
         //        _conn.Close();
         //    }
         //}
-
-
-
-        public class ChangeRute(string InicioR, string FinR)
-        {
-            public string InicioR { get; set; } = InicioR;
-            public string FinR { get; set; } = FinR;
-        }
-
     }
 }
