@@ -26,7 +26,7 @@ namespace My_Buss_BackEnd.Controllers
             {
                 Utils.OpenConnection(_conn);
                 Utils.ExecuteQuery(q, _conn);
-                Utils.SendEmail(Email, "Se ha comprado un ticket", "has comprado un ticket");
+                //Utils.SendEmail(Email, "Se ha comprado un ticket", "has comprado un ticket");  //Pendiente
             }
             catch (Exception ex)
             {
