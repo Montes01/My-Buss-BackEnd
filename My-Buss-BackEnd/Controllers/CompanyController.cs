@@ -6,6 +6,7 @@ using System.Data.SqlClient;
 using static My_Buss_BackEnd.Helpers.Constants;
 using System.Data;
 using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
 
 namespace My_Buss_BackEnd.Controllers
 {
@@ -121,7 +122,31 @@ namespace My_Buss_BackEnd.Controllers
             }
         }
 
+        [HttpPut]
+        [Authorize]
+        [Route("Actualizar")]
+        public IActionResult UpdateCompany([FromBody] Empresa company)
+        {
+            string? ID_EMPRESA = Utils.Token.GetClaim(HttpContext, "ID_Empresa") ?? null;
+            if (ID_EMPRESA == null) return Unauthorized(new Response(STATUS_MESSAGES.DENIED, "No estas autorizado para actualizar una empresa"));
+            string q = $"EXECUTE ActualizarEmpresa {ID_EMPRESA}, '{company.Nombre}', '{company.CorreoElectronico}', '{company.Contraseña}', '{company.Logo}', '{company.Dirección}', '{company.Teléfono}'";
 
+            
+            Utils.OpenConnection(_conn);
+            try
+            {
+                Utils.ExecuteQuery(q, _conn);
+                return Ok(new Response(STATUS_MESSAGES.OK, "Empresa actualizada correctamente"));
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new Response(STATUS_MESSAGES.ERROR, ex.Message));
+            }
+            finally
+            {
+                Utils.CloseConnection(_conn);
+            }
+        }
 
     }
 }
