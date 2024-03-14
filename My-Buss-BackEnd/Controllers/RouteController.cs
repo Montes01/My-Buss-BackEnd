@@ -103,5 +103,31 @@ namespace API.Controllers
             }
             return Ok(new Response(STATUS_MESSAGES.OK, "Ruta eliminada correctamente"));
         }
+
+        [HttpPost]
+        [Authorize]
+        [Route("AgregarParadero")]
+        public IActionResult AddStopToRoute([FromBody] Ruta_Paradero paraderoRuta)
+        {
+            string? ID_EMPRESA = Utils.Token.GetClaim(HttpContext, "ID_Empresa") ?? null;
+            if (ID_EMPRESA == null) return Unauthorized(new Response(STATUS_MESSAGES.DENIED, "No estas autorizado para agregar un paradero a una ruta"));
+            string q = $"EXECUTE AgregarParaderoARuta {paraderoRuta.ID_Ruta}, {paraderoRuta.ID_Paradero}, {ID_EMPRESA}";
+
+            try
+            {
+                Utils.OpenConnection(_conn);
+                Utils.ExecuteQuery(q, _conn);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new Response(STATUS_MESSAGES.ERROR, ex.Message));
+            }
+            finally
+            {
+                Utils.CloseConnection(_conn);
+            }
+            return Ok(new Response(STATUS_MESSAGES.OK, "Paradero agregado a la ruta correctamente"));
+        }
+    
     }
 }
