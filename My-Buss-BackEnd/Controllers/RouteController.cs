@@ -79,5 +79,29 @@ namespace API.Controllers
             }
         }
 
+        [HttpDelete]
+        [Authorize]
+        [Route("Eliminar")]
+        public IActionResult DeleteRute([FromQuery] int ID_Ruta)
+        {
+            string? ID_EMPRESA = Utils.Token.GetClaim(HttpContext, "ID_Empresa") ?? null;
+            if (ID_EMPRESA == null) return Unauthorized(new Response(STATUS_MESSAGES.DENIED, "No estas autorizado para eliminar una ruta"));
+            string q = $"EXECUTE EliminarRuta {ID_Ruta}, {ID_EMPRESA}";
+
+            try
+            {
+                Utils.OpenConnection(_conn);
+                Utils.ExecuteQuery(q, _conn);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new Response(STATUS_MESSAGES.ERROR, ex.Message));
+            }
+            finally
+            {
+                Utils.CloseConnection(_conn);
+            }
+            return Ok(new Response(STATUS_MESSAGES.OK, "Ruta eliminada correctamente"));
+        }
     }
 }

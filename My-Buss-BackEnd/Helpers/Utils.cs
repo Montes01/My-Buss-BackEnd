@@ -47,6 +47,18 @@ namespace My_Buss_BackEnd.Helpers
             return dt;
         }
 
+        public static DataTable GetTableFromCommand(SqlCommand cmd)
+        {
+            DataTable dt = new();
+            new SqlDataAdapter(cmd).Fill(dt);
+            return dt;
+        }
+
+        public static void ExecuteCommand(SqlCommand cmd)
+        {
+            cmd.ExecuteNonQuery();
+        }
+
         public static void SendEmail(string to, string subject, string body)
         {
 
