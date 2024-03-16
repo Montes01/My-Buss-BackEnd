@@ -190,7 +190,7 @@ namespace API.Controllers
         }
 
         [HttpGet]
-        [Route("Paradero")]
+        [Route("ListarPorParadero")]
         public IActionResult GetRutesByStop([FromQuery] int ID_Paradero)
         {
             string q = $"EXECUTE ListarRutasPorParada {ID_Paradero}";
