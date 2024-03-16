@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using My_Buss_BackEnd.Helpers;
 using My_Buss_BackEnd.Models;
@@ -38,6 +39,32 @@ namespace My_Buss_BackEnd.Controllers
             }
 
             return Ok(new Response(STATUS_MESSAGES.OK, "Ticket agregado correctamente"));
+        }
+
+        [HttpDelete]
+        [Route("Eliminar")]
+        [Authorize]
+        public IActionResult DeleteTicket([FromQuery] int ID_Ticket)
+        {
+            string? IDUsuario = Utils.Token.GetClaim(HttpContext, "ID_Usuario") ?? null;
+            if (IDUsuario == null) return Unauthorized(new Response(STATUS_MESSAGES.DENIED, "No estas autorizado para eliminar un ticket"));
+            string q = $"EXECUTE EliminarTicket {ID_Ticket}, {IDUsuario}";
+
+            try
+            {
+                Utils.OpenConnection(_conn);
+                Utils.ExecuteQuery(q, _conn);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new Response(STATUS_MESSAGES.ERROR, ex.Message));
+            }
+            finally
+            {
+                Utils.CloseConnection(_conn);
+            }
+
+            return Ok(new Response(STATUS_MESSAGES.OK, "Ticket eliminado correctamente"));
         }
     }
 }
