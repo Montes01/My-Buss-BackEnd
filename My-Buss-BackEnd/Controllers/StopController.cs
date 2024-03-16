@@ -69,5 +69,35 @@ namespace My_Buss_BackEnd.Controllers
                 return BadRequest(new Response(STATUS_MESSAGES.ERROR, ex.Message));
             }
         }
+
+
+        [HttpGet]
+        [Route("Obtener")]
+        public IActionResult GetStop([FromQuery] int ID_Paradero)
+        {
+            string q = $"EXECUTE ObtenerParadero {ID_Paradero}";
+            try
+            {
+                DataTable dt = Utils.GetTableFromQuery(q, _conn);
+                if (dt.Rows.Count == 0)
+                {
+                    return BadRequest(new Response(STATUS_MESSAGES.ERROR, "El paradero que buscas no existe"));
+                }
+                DataRow el = dt.Rows[0];
+                Paradero paradero = new ()
+                {
+                    ID_Paradero = (int)el["ID_Paradero"]!,
+                    Nombre = el["Nombre"].ToString()!,
+                    Ubicación = el["Ubicación"].ToString() ?? "empty",
+                    Descripción = el["Descripción"].ToString() ?? "empty",
+                    Foto = el["Foto"].ToString() ?? "empty"
+                };
+                return Ok(new Response(STATUS_MESSAGES.OK, paradero));
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new Response(STATUS_MESSAGES.ERROR, ex.Message));
+            }
+        }
     }
 }

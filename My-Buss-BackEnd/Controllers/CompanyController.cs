@@ -148,5 +148,40 @@ namespace My_Buss_BackEnd.Controllers
             }
         }
 
+        [HttpGet]
+        [Route("Obtener")]
+        public IActionResult GetCompany([FromQuery] int ID_Empresa)
+        {
+            string q = $"EXECUTE ObtenerEmpresa {ID_Empresa}";
+            Utils.OpenConnection(_conn);
+            try
+            {
+                var dt = Utils.GetTableFromQuery(q, _conn);
+                if (dt.Rows.Count == 0)
+                {
+                    return BadRequest(new Response(STATUS_MESSAGES.ERROR, "La empresa que buscas no existe"));
+                }
+                DataRow row = dt.Rows[0];
+                Empresa company = new()
+                {
+                    ID_Empresa = (int)row["ID_Empresa"],
+                    Nombre = row["Nombre"].ToString()!,
+                    CorreoElectronico = row["CorreoElectronico"].ToString()!,
+                    Contraseña = null,
+                    Logo = row["Logo"].ToString(),
+                    Dirección = row["Dirección"].ToString(),
+                    Teléfono = row["Teléfono"].ToString()!
+                };
+                return Ok(new Response(STATUS_MESSAGES.OK, company));
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new Response(STATUS_MESSAGES.ERROR, ex.Message));
+            }
+            finally
+            {
+                Utils.CloseConnection(_conn);
+            }
+        }
     }
 }
