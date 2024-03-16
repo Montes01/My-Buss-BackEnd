@@ -128,6 +128,96 @@ namespace API.Controllers
             }
             return Ok(new Response(STATUS_MESSAGES.OK, "Paradero agregado a la ruta correctamente"));
         }
-    
+
+        [HttpGet]
+        [Route("Lista")]
+        public IActionResult GetRutes()
+        {
+            string q = "EXECUTE ListarRutas";
+            try
+            {
+                var dt = Utils.GetTableFromQuery(q, _conn);
+                List<Ruta> rutas = [];
+                foreach (DataRow item in dt.Rows)
+                {
+                    rutas.Add(new Ruta
+                    {
+                        ID_Ruta = (int)item["ID_Ruta"]!,
+                        ID_Empresa = (int)item["ID_Empresa"]!,
+                        Nombre = item["Nombre"].ToString()!,
+                        Tipo = item["Tipo"].ToString() ?? "empty",
+                        Descripción = item["Descripción"].ToString() ?? "empty",
+                        Horario = item["Horario"].ToString() ?? "empty",
+                        Tarifa = double.Parse(item["Tarifa"]?.ToString() ?? "0")
+                    });
+                }
+                return Ok(new Response(STATUS_MESSAGES.OK, rutas));
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new Response(STATUS_MESSAGES.ERROR, ex.Message));
+            }
+        }
+
+        [HttpGet]
+        [Route("Alternativas")]
+        public IActionResult GetAlternatives([FromQuery] int ID_Ruta)
+        {
+            string q = "EXECUTE ListarRutasAlternativas";
+            try
+            {
+                var dt = Utils.GetTableFromQuery(q, _conn);
+                List<Ruta> rutas = [];
+                foreach (DataRow item in dt.Rows)
+                {
+                    rutas.Add(new Ruta
+                    {
+                        ID_Ruta = (int)item["ID_Ruta"]!,
+                        ID_Empresa = (int)item["ID_Empresa"]!,
+                        Nombre = item["Nombre"].ToString()!,
+                        Tipo = item["Tipo"].ToString() ?? "empty",
+                        Descripción = item["Descripción"].ToString() ?? "empty",
+                        Horario = item["Horario"].ToString() ?? "empty",
+                        Tarifa = double.Parse(item["Tarifa"]?.ToString() ?? "0")
+                    });
+                }
+                return Ok(new Response(STATUS_MESSAGES.OK, rutas));
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new Response(STATUS_MESSAGES.ERROR, ex.Message));
+            }
+        }
+
+        [HttpGet]
+        [Route("Paradero")]
+        public IActionResult GetRutesByStop([FromQuery] int ID_Paradero)
+        {
+            string q = $"EXECUTE ListarRutasPorParada {ID_Paradero}";
+            try
+            {
+                var dt = Utils.GetTableFromQuery(q, _conn);
+                List<Ruta> rutas = [];
+                foreach (DataRow item in dt.Rows)
+                {
+                    rutas.Add(new Ruta
+                    {
+                        ID_Ruta = (int)item["ID_Ruta"]!,
+                        ID_Empresa = (int)item["ID_Empresa"]!,
+                        Nombre = item["Nombre"].ToString()!,
+                        Tipo = item["Tipo"].ToString() ?? "empty",
+                        Descripción = item["Descripción"].ToString() ?? "empty",
+                        Horario = item["Horario"].ToString() ?? "empty",
+                        Tarifa = double.Parse(item["Tarifa"]?.ToString() ?? "0")
+                    });
+                }
+                return Ok(new Response(STATUS_MESSAGES.OK, rutas));
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new Response(STATUS_MESSAGES.ERROR, ex.Message));
+            }
+        }
+
     }
 }

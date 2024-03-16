@@ -41,5 +41,33 @@ namespace My_Buss_BackEnd.Controllers
             }
         }
 
+         
+        [HttpGet]
+        [Route("ListarPorRuta")]
+        public IActionResult GetStopsByRoute([FromQuery] int ID_Ruta)
+        {
+            string q = $"EXECUTE ListarParadasPorRuta {ID_Ruta}";
+            try
+            {
+                DataTable dt = Utils.GetTableFromQuery(q, _conn);
+                List<Paradero> paraderos = [];
+                foreach (DataRow el in dt.Rows)
+                {
+                    paraderos.Add(new Paradero
+                    {
+                        ID_Paradero = (int)el["ID_Paradero"]!,
+                        Nombre = el["Nombre"].ToString()!,
+                        Ubicación = el["Ubicación"].ToString() ?? "empty",
+                        Descripción = el["Descripción"].ToString() ?? "empty",
+                        Foto = el["Foto"].ToString() ?? "empty"
+                    });
+                }
+                return Ok(new Response(STATUS_MESSAGES.OK, paraderos));
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new Response(STATUS_MESSAGES.ERROR, ex.Message));
+            }
+        }
     }
 }
