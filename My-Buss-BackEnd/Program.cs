@@ -1,12 +1,21 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using My_Buss_BackEnd.Helpers;
+using My_Buss_BackEnd.Interfaces;
+using My_Buss_BackEnd.Models;
 using System.Text;
 var builder = WebApplication.CreateBuilder(args);
+
 
 builder.Services.AddControllers();
 
 builder.Configuration.AddJsonFile("appsettings.json");
+
+builder.Services.AddTransient<IMessage, SendEmail>();
+
+var mailSettings = builder.Configuration.GetSection("GmailSettings");
+
+builder.Services.Configure<GmailSettings>(mailSettings);
 
 string SecretKey = builder.Configuration.GetSection("SecretKey").ToString()!;
 

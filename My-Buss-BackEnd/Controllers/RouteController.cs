@@ -246,5 +246,33 @@ namespace API.Controllers
                 return BadRequest(new Response(STATUS_MESSAGES.ERROR, ex.Message));
             }
         }
+
+        [HttpGet]
+        [Route("ObtenerPorNombre")]
+        public IActionResult GetRuteByName([FromQuery] string Nombre)
+        {
+            string q = $"EXECUTE ObtenerRutaPorNombre '{Nombre}'";
+            try
+            {
+                var dt = Utils.GetTableFromQuery(q, _conn);
+                DataRow dataRow = dt.Rows[0];
+                Ruta ruta = new()
+                {
+                    ID_Ruta = (int)dataRow["ID_Ruta"]!,
+                    ID_Empresa = (int)dataRow["ID_Empresa"]!,
+                    Nombre = dataRow["Nombre"].ToString()!,
+                    Tipo = dataRow["Tipo"].ToString() ?? "empty",
+                    Descripción = dataRow["Descripción"].ToString() ?? "empty",
+                    Horario = dataRow["Horario"].ToString() ?? "empty",
+                    Tarifa = double.Parse(dataRow["Tarifa"]?.ToString() ?? "0")
+                };
+
+                return Ok(new Response(STATUS_MESSAGES.OK, ruta));
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new Response(STATUS_MESSAGES.ERROR, ex.Message));
+            }
+        }   
     }
 }

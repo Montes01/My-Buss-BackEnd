@@ -2,10 +2,7 @@
 using System.Data;
 using System.Data.SqlClient;
 using System.IdentityModel.Tokens.Jwt;
-using System.Net.Mail;
-using System.Net;
 using System.Security.Claims;
-using System.Net.Mail;
 
 namespace My_Buss_BackEnd.Helpers
 {
@@ -59,30 +56,6 @@ namespace My_Buss_BackEnd.Helpers
             cmd.ExecuteNonQuery();
         }
 
-        public static void SendEmail(string to, string subject, string body)
-        {
-
-            // Configurar el cliente SMTP
-            var smtpClient = new SmtpClient("gmail-smtp-in.l.google.com", 587)
-            {
-                UseDefaultCredentials = false,
-                Credentials = new NetworkCredential("MyBuss", "123456789aA!"),
-                EnableSsl = true
-            };
-
-            // Crear el mensaje de correo electrónico
-            var mailMessage = new MailMessage
-            {
-                From = new MailAddress("MyBussProject@gmail.com")
-            };
-            mailMessage.To.Add(to);
-            mailMessage.Subject = subject;
-            mailMessage.Body = body;
-
-            // Enviar el correo electrónico
-            smtpClient.Send(mailMessage);
-
-        }
 
         public static SqlConnection GetConnection(string connectionString) => new(connectionString);
 
@@ -94,7 +67,7 @@ namespace My_Buss_BackEnd.Helpers
             public static Claim[] GetClaims(HttpContext context)
             {
                 string token = context.Request.Headers.Authorization.ToString().Replace("Bearer ", "");
-                
+
                 var handler = new JwtSecurityTokenHandler();
 
                 var jsonToken = handler.ReadToken(token) as JwtSecurityToken;
