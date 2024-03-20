@@ -9,6 +9,7 @@
         public string? Descripción { get; set; }
         public string? Horario { get; set; }
         public double Tarifa { get; set; }
+        public Paradero[]? Paraderos { get; set; }
 
     }
 }
