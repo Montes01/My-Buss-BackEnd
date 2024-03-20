@@ -36,6 +36,14 @@ namespace API.Controllers
             {
                 Utils.OpenConnection(_conn);
                 Utils.ExecuteQuery(q, _conn);
+                if (ruta.Paraderos != null)
+                {
+                    foreach (var paradero in ruta.Paraderos)
+                    {
+                        string q2 = $"EXECUTE AgregarParaderoARuta {ruta.ID_Ruta}, {paradero.ID_Paradero}, {ID_EMPRESA}";
+                        Utils.ExecuteQuery(q2, _conn);
+                    }
+                }
             }
             catch (Exception ex)
             {
