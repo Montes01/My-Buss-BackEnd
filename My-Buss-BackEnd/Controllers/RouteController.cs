@@ -36,14 +36,15 @@ namespace API.Controllers
             {
                 Utils.OpenConnection(_conn);
                 Utils.ExecuteQuery(q, _conn);
-                if (ruta.Paraderos != null)
+
+                DataTable AddedRoute = Utils.GetTableFromQuery($"EXECUTE ObtenerRutaPorNombre '{ruta.Nombre}'", _conn);
+                ruta.ID_Ruta = (int)AddedRoute.Rows[0]["ID_Ruta"]!;
+                foreach (var paradero in ruta.Paraderos)
                 {
-                    foreach (var paradero in ruta.Paraderos)
-                    {
-                        string q2 = $"EXECUTE AgregarParaderoARuta {ruta.ID_Ruta}, {paradero.ID_Paradero}, {ID_EMPRESA}";
-                        Utils.ExecuteQuery(q2, _conn);
-                    }
+                    string q2 = $"EXECUTE AgregarParaderoARuta {(int)ruta.ID_Ruta!}, {paradero}, {int.Parse(ID_EMPRESA)}";
+                    Utils.ExecuteQuery(q2, _conn);
                 }
+                
             }
             catch (Exception ex)
             {
