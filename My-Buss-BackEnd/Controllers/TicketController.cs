@@ -5,6 +5,7 @@ using My_Buss_BackEnd.Interfaces;
 using My_Buss_BackEnd.Models;
 using System.Data;
 using System.Data.SqlClient;
+using Stripe;
 using static My_Buss_BackEnd.Helpers.Constants;
 namespace My_Buss_BackEnd.Controllers
 {
@@ -26,11 +27,25 @@ namespace My_Buss_BackEnd.Controllers
             string? IDUsuario = Utils.Token.GetClaim(HttpContext, "ID_Usuario") ?? null;
             if (IDUsuario == null) return Unauthorized(new Response(STATUS_MESSAGES.DENIED, "No estas autorizado para pagar un ticket"));
             string Email = Utils.Token.GetClaim(HttpContext, "CorreoElectronico")!;
+
+            StripeConfiguration.ApiKey = "sk_test_51OyEqeITkeuqFU4OYMbjyaiT8zT4xELkMW6VCwMTr7361jwjWEvZSFsDcoaA9GVYKNw74byZhH22RKun4ykseQEy00xxyQtH4R";
+
+            var options = new PaymentIntentCreateOptions
+            {
+                Amount = (long)(ticket.Precio * 100),
+                Currency = "usd",
+                PaymentMethodTypes = ["card"],
+                PaymentMethod = ticket.TipoPago,
+                
+            };
+            
+            var service = new PaymentIntentService();
             string Nombre = Utils.Token.GetClaim(HttpContext, "Nombre")!;
             string q_01 = $"EXECUTE ObtenerEmpresa {ticket.ID_Empresa}";
             string q_02 = $"EXECUTE PagarTicket {ticket.ID_Ticket}";
             try
             {
+                service.Create(options);
                 Utils.OpenConnection(_conn);
                 DataTable dt = Utils.GetTableFromQuery(q_01, _conn);
                 DataRow row = dt.Rows[0];
