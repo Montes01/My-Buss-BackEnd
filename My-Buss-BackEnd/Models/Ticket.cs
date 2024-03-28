@@ -10,6 +10,8 @@
         public string? TipoPago { get; set; }
         public string? Estado { get; set; }
 
+        public string? PaymentId { get; set; }
+
         /*
          *{
             

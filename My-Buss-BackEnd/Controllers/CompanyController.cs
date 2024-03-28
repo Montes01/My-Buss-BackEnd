@@ -183,5 +183,30 @@ namespace My_Buss_BackEnd.Controllers
                 Utils.CloseConnection(_conn);
             }
         }
+
+        [HttpDelete]
+        [Authorize]
+        [Route("Eliminar")]
+        public IActionResult DeleteCompany([FromQuery] int ID_Empresa)
+        {
+            string? ID_EMPRESA = Utils.Token.GetClaim(HttpContext, "ID_Empresa") ?? null;
+            if (ID_EMPRESA == null) return Unauthorized(new Response(STATUS_MESSAGES.DENIED, "No estas autorizado para eliminar una empresa"));
+            string q = $"EXECUTE EliminarEmpresa {ID_Empresa}";
+
+            Utils.OpenConnection(_conn);
+            try
+            {
+                Utils.ExecuteQuery(q, _conn);
+                return Ok(new Response(STATUS_MESSAGES.OK, "Empresa eliminada correctamente"));
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new Response(STATUS_MESSAGES.ERROR, ex.Message));
+            }
+            finally
+            {
+                Utils.CloseConnection(_conn);
+            }
+        }
     }
 }
