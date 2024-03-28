@@ -35,16 +35,17 @@ namespace My_Buss_BackEnd.Controllers
                 Amount = (long)(ticket.Precio * 100),
                 Currency = "usd",
                 PaymentMethodTypes = ["card"],
-                PaymentMethod = ticket.TipoPago,
-                
+                PaymentMethod = ticket.PaymentId,
+                Confirm = true,
             };
-            
+
             var service = new PaymentIntentService();
             string Nombre = Utils.Token.GetClaim(HttpContext, "Nombre")!;
             string q_01 = $"EXECUTE ObtenerEmpresa {ticket.ID_Empresa}";
             string q_02 = $"EXECUTE PagarTicket {ticket.ID_Ticket}";
             try
             {
+
                 service.Create(options);
                 Utils.OpenConnection(_conn);
                 DataTable dt = Utils.GetTableFromQuery(q_01, _conn);

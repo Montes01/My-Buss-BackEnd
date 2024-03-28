@@ -6,6 +6,7 @@ using System.Data.SqlClient;
 using My_Buss_BackEnd.Helpers;
 using My_Buss_BackEnd.Models;
 using static My_Buss_BackEnd.Helpers.Constants;
+using Microsoft.AspNetCore.Authorization;
 
 namespace API.Controllers
 {
@@ -69,15 +70,6 @@ namespace API.Controllers
             {
                 return BadRequest(new Response(STATUS_MESSAGES.ERROR, "Debes enviar una contraseña"));
             }
-            /*
-                 @Nombre NVARCHAR(100),
-    @Rol NVARCHAR(50) = NULL,
-    @CorreoElectronico NVARCHAR(100),
-    @Contraseña NVARCHAR(50),
-    @FotoPerfil NVARCHAR(MAX) = NULL,
-    @Dirección NVARCHAR(200) = NULL,
-    @Teléfono NVARCHAR(20)
-             */
             string q = $"EXECUTE RegistrarUsuario '{request.Nombre}', '{request.Rol}', '{request.CorreoElectronico}', '{request.Contraseña}', '{request.FotoPerfil}', '{request.Dirección}', '{request.Teléfono}'";
             try
             {
@@ -93,6 +85,35 @@ namespace API.Controllers
             }
 
             return Ok(new Response(STATUS_MESSAGES.OK, "Usuario registrado"));
+        }
+
+        [HttpPut]
+        [Route("Actualizar")]
+        [Authorize]
+        public IActionResult Actualizar([FromBody] Usuario request)
+        {
+            string ID_Usuario = Utils.Token.GetClaim(HttpContext, "ID_Usuario") ?? null;
+            if (ID_Usuario == null)
+            {
+                return Unauthorized(new Response(STATUS_MESSAGES.DENIED, "No tienes permisos para realizar esta acción"));
+            }
+            string q = $"EXECUTE ActualizarUsuario {ID_Usuario}, '{request.Nombre}', '{request.CorreoElectronico}', '{request.Contraseña}', '{request.FotoPerfil}', '{request.Dirección}', '{request.Teléfono}'";
+
+            try
+            {
+                Utils.OpenConnection(_conn);
+                Utils.ExecuteQuery(q, _conn);
+                return Ok(new Response(STATUS_MESSAGES.OK, "Usuario actualizado correctamente"));
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new Response(STATUS_MESSAGES.ERROR, ex.Message));
+            }
+            finally
+            {
+                Utils.CloseConnection(_conn);
+            }
+
         }
     }
 }
