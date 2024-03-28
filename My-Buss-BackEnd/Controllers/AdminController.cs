@@ -94,10 +94,80 @@ namespace My_Buss_BackEnd.Controllers
                         TipoPago = (string)el["TipoPago"],
                         Estado = (string)el["Estado"],
                         PaymentId = (string)el["PaymentId"],
-                        
+
                     });
                 }
                 return Ok(new Response(STATUS_MESSAGES.OK, tickets));
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new Response(STATUS_MESSAGES.ERROR, ex.Message));
+            }
+            finally
+            {
+                Utils.CloseConnection(_conn);
+            }
+        }
+
+
+
+        [HttpDelete]
+        [Route("Eliminar/Usuario")]
+        public IActionResult DeleteUser([FromQuery] int userId)
+        {
+            string? rol = Utils.Token.GetClaim(HttpContext, "Rol");
+            if (rol != "admin") return Unauthorized(new Response(STATUS_MESSAGES.DENIED, "No tienes permisos para realizar esta acción"));
+
+            string q = $"EXECUTE EliminarUsuario {userId}";
+
+            Utils.OpenConnection(_conn);
+            try
+            {
+                Utils.ExecuteQuery(q, _conn);
+                return Ok(new Response(STATUS_MESSAGES.OK, "Usuario eliminado correctamente"));
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new Response(STATUS_MESSAGES.ERROR, ex.Message));
+            }
+            finally
+            {
+                Utils.CloseConnection(_conn);
+            }
+        }
+
+        [HttpGet]
+        [Route("Listar/Usuarios")]
+        public IActionResult GetUsers()
+        {
+            string? rol = Utils.Token.GetClaim(HttpContext, "Rol");
+            if (rol != "admin") return Unauthorized(new Response(STATUS_MESSAGES.DENIED, "No tienes permisos para realizar esta acción"));
+
+            string q = "EXECUTE ListarUsuariosAdmin";
+
+
+
+            Utils.OpenConnection(_conn);
+            try
+            {
+                var dt = Utils.GetTableFromQuery(q, _conn);
+                List<Usuario> users = [];
+                foreach (DataRow el in dt.Rows)
+                {
+                    users.Add(new Usuario
+                        (
+                            (int)el["ID_Usuario"],
+                            (string)el["Nombre"],
+                            (string)el["CorreoElectronico"],
+                            (string)el["Teléfono"],
+                            (string?)el["Rol"],
+                            (string?)el["Contraseña"],
+                            (string?)el["FotoPerfil"],
+                            (string?)el["Dirección"]
+                        )
+                        );
+                }
+                return Ok(new Response(STATUS_MESSAGES.OK, users));
             }
             catch (Exception ex)
             {
