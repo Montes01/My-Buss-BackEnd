@@ -42,7 +42,7 @@ namespace My_Buss_BackEnd.Controllers
             var service = new PaymentIntentService();
             string Nombre = Utils.Token.GetClaim(HttpContext, "Nombre")!;
             string q_01 = $"EXECUTE ObtenerEmpresa {ticket.ID_Empresa}";
-            string q_02 = $"EXECUTE PagarTicket {ticket.ID_Ticket}";
+            string q_02 = $"EXECUTE PagarTicket {ticket.ID_Ticket}, '{ticket.PaymentId}'";
             try
             {
 
