@@ -155,17 +155,16 @@ namespace My_Buss_BackEnd.Controllers
                 foreach (DataRow el in dt.Rows)
                 {
                     users.Add(new Usuario
-                        (
-                            (int)el["ID_Usuario"],
-                            (string)el["Nombre"],
-                            (string)el["CorreoElectronico"],
-                            (string)el["Teléfono"],
-                            (string?)el["Rol"],
-                            (string?)el["Contraseña"],
-                            (string?)el["FotoPerfil"],
-                            (string?)el["Dirección"]
-                        )
-                        );
+                    (
+                        (int)el["ID_Usuario"],
+                        (string)el["Nombre"],
+                        (string)el["CorreoElectronico"],
+                        (string)el["Teléfono"],
+                        el["Rol"]?.ToString() ?? string.Empty, // Si "Rol" es null, se asigna "".
+                        el["Contraseña"]?.ToString() ?? string.Empty, // Si "Contraseña" es null, se asigna "".
+                        el["FotoPerfil"]?.ToString() ?? string.Empty, // Si "FotoPerfil" es null, se asigna "".
+                        el["Dirección"]?.ToString() ?? string.Empty // Si "Dirección" es null, se asigna "".
+                    ));
                 }
                 return Ok(new Response(STATUS_MESSAGES.OK, users));
             }
