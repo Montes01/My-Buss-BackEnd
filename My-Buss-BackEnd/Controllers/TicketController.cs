@@ -66,7 +66,33 @@ namespace My_Buss_BackEnd.Controllers
             return Ok(new Response(STATUS_MESSAGES.OK, "Ticket pagado correctamente"));
         }
 
+        //usar ticket, solo para rol de conductor
+        [HttpPut]
+        [Route("Usar")]
+        [Authorize]
+        public IActionResult UseTicket([FromQuery] int ticketId)
+        {
+            string? rol = Utils.Token.GetClaim(HttpContext, "Rol");
+            if (rol != "conductor") return Unauthorized(new Response(STATUS_MESSAGES.DENIED, "No tienes permisos para realizar esta acción"));
+            string q = $"EXECUTE UsarTicket {ticketId}";
 
+
+            try
+            {
+                Utils.OpenConnection(_conn);
+                Utils.ExecuteQuery(q, _conn);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new Response(STATUS_MESSAGES.ERROR, ex.Message));
+            }
+            finally
+            {
+                Utils.CloseConnection(_conn);
+            }
+
+            return Ok(new Response(STATUS_MESSAGES.OK, "Ticket usado correctamente"));
+        }
 
 
         [HttpGet]
