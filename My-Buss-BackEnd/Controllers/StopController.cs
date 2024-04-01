@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using My_Buss_BackEnd.Helpers;
 using My_Buss_BackEnd.Models;
@@ -93,6 +94,49 @@ namespace My_Buss_BackEnd.Controllers
                     Foto = el["Foto"].ToString() ?? "empty"
                 };
                 return Ok(new Response(STATUS_MESSAGES.OK, paradero));
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new Response(STATUS_MESSAGES.ERROR, ex.Message));
+            }
+        }
+
+        //agregar y eliminar, solo los administradores pueden
+
+        [HttpPost]
+        [Route("Agregar")]
+        [Authorize]
+        public IActionResult AddStop([FromBody] Paradero paradero)
+        {
+            string? rol = Utils.Token.GetClaim(HttpContext, "Rol");
+            if (rol != "admin") return Unauthorized(new Response(STATUS_MESSAGES.DENIED, "No tienes permisos para realizar esta acción"));
+
+            string q = $"EXECUTE AgregarParadero '{paradero.Nombre}', '{paradero.Ubicación}', '{paradero.Descripción}', '{paradero.Foto}'";
+
+            try
+            {
+                Utils.ExecuteQuery(q, _conn);
+                return Ok(new Response(STATUS_MESSAGES.OK, "Paradero agregado correctamente"));
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new Response(STATUS_MESSAGES.ERROR, ex.Message));
+            }
+        }
+
+        [HttpDelete]
+        [Route("Eliminar")]
+        [Authorize]
+        public IActionResult DeleteStop([FromQuery] int ID_Paradero)
+        {
+            string? rol = Utils.Token.GetClaim(HttpContext, "Rol");
+            if (rol != "admin") return Unauthorized(new Response(STATUS_MESSAGES.DENIED, "No tienes permisos para realizar esta acción"));
+
+            string q = $"EXECUTE EliminarParadero {ID_Paradero}";
+       try
+            {
+                Utils.ExecuteQuery(q, _conn);
+                return Ok(new Response(STATUS_MESSAGES.OK, "Paradero eliminado correctamente"));
             }
             catch (Exception ex)
             {

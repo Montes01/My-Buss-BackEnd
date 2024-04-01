@@ -115,6 +115,158 @@ namespace API.Controllers
             }
 
         }
+
+        //solicitar ser conductor
+        [HttpPost]
+        [Route("Trabajo")]
+        [Authorize]
+        public IActionResult SolicitarConductor([FromBody] Conductor request)
+        {
+            string? ID_Usuario = Utils.Token.GetClaim(HttpContext, "ID_Usuario") ?? null;
+            if (ID_Usuario == null)
+            {
+                return Unauthorized(new Response(STATUS_MESSAGES.DENIED, "No tienes permisos para realizar esta acción"));
+            }
+            string q = $"EXECUTE SolicitarConductor {ID_Usuario}, '{null}', '{request.HorarioTrabajo}', '{request.Licencia}'";
+
+            try
+            {
+                Utils.OpenConnection(_conn);
+                Utils.ExecuteQuery(q, _conn);
+                return Ok(new Response(STATUS_MESSAGES.OK, "Solicitud enviada correctamente"));
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new Response(STATUS_MESSAGES.ERROR, ex.Message));
+            }
+            finally
+            {
+                Utils.CloseConnection(_conn);
+            }
+        }
+
+        //aprobar y rechazar trabajadores
+
+        [HttpPut]
+        [Route("Aprobar")]
+        [Authorize]
+        public IActionResult AprobarConductor([FromQuery] int ID_Conductor)
+        {
+            string? rol = Utils.Token.GetClaim(HttpContext, "Rol");
+            if (rol != "admin") return Unauthorized(new Response(STATUS_MESSAGES.DENIED, "No tienes permisos para realizar esta acción"));
+
+            string q = $"EXECUTE AprobarConductor {ID_Conductor}";
+
+
+            try
+            {
+                Utils.OpenConnection(_conn);
+                Utils.ExecuteQuery(q, _conn);
+                return Ok(new Response(STATUS_MESSAGES.OK, "Conductor aprobado correctamente"));
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new Response(STATUS_MESSAGES.ERROR, ex.Message));
+            }
+            finally
+            {
+                Utils.CloseConnection(_conn);
+            }
+        }
+
+        [HttpPut]
+        [Route("Rechazar")]
+        [Authorize]
+        public IActionResult RechazarConductor([FromQuery] int ID_Conductor)
+        {
+            string? rol = Utils.Token.GetClaim(HttpContext, "Rol");
+            if (rol != "admin") return Unauthorized(new Response(STATUS_MESSAGES.DENIED, "No tienes permisos para realizar esta acción"));
+
+            string q = $"EXECUTE RechazarConductor {ID_Conductor}";
+
+            try
+            {
+                Utils.OpenConnection(_conn);
+                Utils.ExecuteQuery(q, _conn);
+                return Ok(new Response(STATUS_MESSAGES.OK, "Conductor rechazado correctamente"));
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new Response(STATUS_MESSAGES.ERROR, ex.Message));
+            }
+            finally
+            {
+                Utils.CloseConnection(_conn);
+            }
+        }
+
+        //cancelar solicitud
+        [HttpDelete]
+        [Route("Cancelar")]
+        [Authorize]
+        public IActionResult CancelarSolicitud()
+        {
+            string? ID_Usuario = Utils.Token.GetClaim(HttpContext, "ID_Usuario") ?? null;
+            if (ID_Usuario == null)
+            {
+                return Unauthorized(new Response(STATUS_MESSAGES.DENIED, "No tienes permisos para realizar esta acción"));
+            }
+            string q = $"EXECUTE CancelarSolicitud {ID_Usuario}";
+
+            try
+            {
+                Utils.OpenConnection(_conn);
+                Utils.ExecuteQuery(q, _conn);
+                return Ok(new Response(STATUS_MESSAGES.OK, "Solicitud cancelada correctamente"));
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new Response(STATUS_MESSAGES.ERROR, ex.Message));
+            }
+            finally
+            {
+                Utils.CloseConnection(_conn);
+            }
+        }
+
+
+        //listar aspirantes
+        [HttpGet]
+        [Route("Listar/Aspirantes")]
+        [Authorize]
+        public IActionResult GetAspirantes()
+        {
+            string? rol = Utils.Token.GetClaim(HttpContext, "Rol");
+            if (rol != "admin") return Unauthorized(new Response(STATUS_MESSAGES.DENIED, "No tienes permisos para realizar esta acción"));
+
+            string q = "EXECUTE ListarAspirantes";
+
+
+            try
+            {
+                DataTable dt = Utils.GetTableFromQuery(q, _conn);
+                List<Conductor> aspirantes = new();
+                foreach (DataRow el in dt.Rows)
+                {
+                    Conductor aspirante = new()
+                    {
+                        ID_Conductor = (int)el["ID_Conductor"],
+                        ID_Usuario = (int)el["ID_Usuario"],
+                        FechaContrato = (DateTime)el["FechaContrato"],
+                        HorarioTrabajo = el["HorarioTrabajo"].ToString(),
+                        Licencia = el["Licencia"].ToString(),
+                        Estado = (bool)el["Estado"]
+                    };
+                    aspirantes.Add(aspirante);
+                }
+                return Ok(new Response(STATUS_MESSAGES.OK, aspirantes));
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new Response(STATUS_MESSAGES.ERROR, ex.Message));
+            }
+        }
+
     }
 }
 
